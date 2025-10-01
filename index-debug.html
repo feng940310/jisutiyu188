@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+    <title>极速体育</title>
+    <link rel="stylesheet" href="./static/uni.0fcc960b.css">
+    <link rel="stylesheet" crossorigin href="./static/index-4NelVyHk.css">
+    
+    <style>
+      #loading-status {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        font-family: Arial, sans-serif;
+        z-index: 9999;
+        text-align: center;
+      }
+      .loading-step {
+        margin: 5px 0;
+        padding: 5px;
+      }
+      .success { color: #4CAF50; }
+      .error { color: #f44336; }
+      .loading { color: #2196F3; }
+    </style>
+  </head>
+  <body>
+    <div id="app"><!--app-html--></div>
+    
+    <!-- 加载状态显示 -->
+    <div id="loading-status">
+      <div class="loading-step loading" id="step1">🔄 正在加载CSS样式...</div>
+      <div class="loading-step" id="step2">⏳ 等待加载ES模块...</div>
+      <div class="loading-step" id="step3">⏳ 等待加载uni-app...</div>
+      <div class="loading-step" id="step4">⏳ 等待应用初始化...</div>
+    </div>
+
+    <script>
+      // 加载状态管理
+      let loadingSteps = {
+        css: false,
+        modules: false,
+        uniapp: false,
+        init: false
+      };
+
+      function updateStep(step, status, message) {
+        const element = document.getElementById(step);
+        element.className = `loading-step ${status}`;
+        element.textContent = message;
+        
+        // 检查是否所有步骤完成
+        if (Object.values(loadingSteps).every(s => s)) {
+          setTimeout(() => {
+            document.getElementById('loading-status').style.display = 'none';
+          }, 1000);
+        }
+      }
+
+      // 检测CSS加载
+      setTimeout(() => {
+        loadingSteps.css = true;
+        updateStep('step1', 'success', '✅ CSS样式加载完成');
+      }, 500);
+
+      // ES模块加载检测
+      let moduleLoadTimeout = setTimeout(() => {
+        updateStep('step2', 'error', '❌ ES模块加载超时');
+        updateStep('step3', 'error', '❌ 使用备用方案...');
+        
+        // 备用方案：显示错误信息和解决建议
+        document.getElementById('step4').innerHTML = `
+          <div style="color: #ff9800; margin-top: 10px;">
+            <strong>⚠️ 检测到兼容性问题</strong><br>
+            GitHub Pages可能不支持当前的ES模块配置<br>
+            <small>建议：使用传统构建模式或添加更多polyfill</small>
+          </div>
+        `;
+      }, 5000);
+
+      // 模块预加载检测
+      const modulePreloads = document.querySelectorAll('link[rel="modulepreload"]');
+      let loadedModules = 0;
+      
+      modulePreloads.forEach(link => {
+        link.onload = () => {
+          loadedModules++;
+          if (loadedModules === modulePreloads.length) {
+            clearTimeout(moduleLoadTimeout);
+            loadingSteps.modules = true;
+            updateStep('step2', 'success', '✅ ES模块预加载完成');
+          }
+        };
+        
+        link.onerror = () => {
+          clearTimeout(moduleLoadTimeout);
+          updateStep('step2', 'error', '❌ ES模块加载失败');
+        };
+      });
+    </script>
+
+    <!-- ES Module Polyfill -->
+    <script nomodule src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    
+    <!-- 主模块加载 -->
+    <script type="module" crossorigin>
+      try {
+        // 动态导入主模块
+        const mainModule = await import('./static/index-C3v_m0JD.js');
+        loadingSteps.uniapp = true;
+        updateStep('step3', 'success', '✅ uni-app模块加载完成');
+        
+        // 等待应用初始化
+        setTimeout(() => {
+          loadingSteps.init = true;
+          updateStep('step4', 'success', '✅ 应用初始化完成');
+        }, 1000);
+        
+      } catch (error) {
+        console.error('模块加载失败:', error);
+        updateStep('step3', 'error', '❌ uni-app加载失败: ' + error.message);
+        updateStep('step4', 'error', '💡 请检查浏览器控制台获取详细错误信息');
+      }
+    </script>
+    
+    <!-- 预加载链接 -->
+    <link rel="modulepreload" crossorigin href="./static/vendor.CqD9dFNX.js">
+    <link rel="modulepreload" crossorigin href="./static/uni.CnKTWU0K.js">
+  </body>
+</html>
